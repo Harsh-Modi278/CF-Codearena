@@ -1,7 +1,6 @@
 const user_html= document.getElementById('user');
-const roomName= "<%= roomName %>";
 const form= document.querySelector('form');
-console.log("**");
+
 async function get_user(user)
 {
     const base_url=`https://codeforces.com/api/user.status?handle=`;

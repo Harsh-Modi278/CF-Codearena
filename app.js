@@ -1,5 +1,6 @@
 // express related
 const express = require("express");
+const morgan = require("morgan");
 const app = express();
 const bodyParser= require("body-parser");
 // dotenv related
@@ -28,16 +29,7 @@ const io = socketio(server,{});
 const rooms = {};
 
 // logger middleware for all requests
-app.use(
-    (req,res,next)=>
-    {
-        console.log();
-        console.log("New request made");
-        console.log("method:",req.method);
-        console.log("path:",req.path);
-        next();
-    }
-);
+app.use(morgan('dev'));
 
 app.get("/",(req,res,next)=>{
     res.render("index",{rooms:rooms});
