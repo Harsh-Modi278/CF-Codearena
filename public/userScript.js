@@ -1,6 +1,6 @@
 const user_html= document.getElementById('user');
 const form= document.querySelector('form');
-console.log("**");
+
 async function get_user(user)
 {
     const base_url=`https://codeforces.com/api/user.status?handle=`;
@@ -19,11 +19,12 @@ function user_input(event)
 {
     get_user(user_html.value)
         .then((user)=>{
-            const url="/"+roomName+"/user";
+            const url="/";
             if(!user)
             {
                 fetch(url,{
                     method: "POST",
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({user: user, isuser:false})
                 })
                 .then(response => response.json())
