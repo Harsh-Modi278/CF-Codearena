@@ -17,7 +17,7 @@ socket.on("room-created",(newRoomName)=>{
     const roomElement = document.createElement("div");
     roomElement.innerText = newRoomName;
     const roomLink = document.createElement("a");
-    roomLink.href = `/${newRoomName}`;
+    roomLink.href = `/${newRoomName}/user/${user}`;
     roomLink.innerText = "Join";
 
     roomContainer.append(roomElement);

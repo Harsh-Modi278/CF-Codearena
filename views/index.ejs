@@ -6,15 +6,18 @@
         
     </head>
     <body>
+        <script>
+            const user = "<%=user%>";
+        </script>
         <div id = "room-container">
             <% Object.keys(rooms).forEach( room =>{ %>
                 <div>
                     <%= room %>
                 </div>
-                <a href="/<%= room %>/user%>">Join</a>
+                <a href="/<%= room %>/user/<%=user%>">Join</a>
             <%})%>
         </div>
-        <form action="/room" method="POST">
+        <form action="/rooms/<%=user%>" method="POST">
             <input type="text" name="room" id="" required>
             <button type="submit"> Create New Room </button>
         </form>

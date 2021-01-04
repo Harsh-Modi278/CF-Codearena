@@ -7,5 +7,57 @@
 </head>
 <body>
     helloo
+    <div id = "output">
+
+    </div>
+
+    <aside id="user1-logs">
+        <h2><strong class = "user-logs-title">user1-logs<%= %></strong></h2>
+        <div class="user-logs-window">
+            
+        </div>
+    
+    </aside>
+
+    <aside id="user2-logs">
+        <h2><strong class = "user-logs-title">user2-logs<%= %></strong></h2>
+        <div class="user-logs-window">
+            
+        </div>
+    
+    </aside>
+
+    <script>
+        const username = "<%= user%>";
+        const roomName = "<%= roomName%>"
+    </script>
+    <script src="http://localhost:5000/socket.io/socket.io.js"> </script>
+    <script src="../../problemPageScript.js"></script>
+
+    <style>
+        body{
+            font-family: 'Nunito';
+        }
+        #user1-logs{
+            float: left;
+            width: 30%;
+            border: 1px solid #ddd;
+            box-shadow: 1px 3px 5px rgba(0,0,0,0.05);
+            border-radius: 2px;
+        }
+        .user-logs-window{
+            height: 80vh;
+            overflow: auto;
+            background: #f9f9f9;
+        }
+        
+        #user2-logs{
+            float: right;
+            width: 30%;
+            border: 1px solid #ddd;
+            box-shadow: 1px 3px 5px rgba(0,0,0,0.05);
+            border-radius: 2px;
+        }
+    </style>
 </body>
 </html>

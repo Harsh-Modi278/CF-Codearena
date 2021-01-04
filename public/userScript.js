@@ -1,3 +1,9 @@
+const socket = io("http://localhost:5000");
+
+socket.on("connect",
+()=>console.log({socketId:socket.id})
+);
+
 const user_html= document.getElementById('user');
 const form= document.querySelector('form');
 
@@ -17,9 +23,11 @@ async function get_user(user)
 
 function user_input(event)
 {
+    event.preventDefault();
     get_user(user_html.value)
         .then((user)=>{
             const url="/";
+            console.log({user});
             if(!user)
             {
                 fetch(url,{
@@ -45,6 +53,6 @@ function user_input(event)
                 
         })
         .catch(err=> console.log(err))
-    event.preventDefault();
+    // event.preventDefault();
 }
 form.addEventListener("submit",user_input);
