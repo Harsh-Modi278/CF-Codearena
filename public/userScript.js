@@ -19,11 +19,12 @@ function user_input(event)
 {
     get_user(user_html.value)
         .then((user)=>{
-            const url="/"+roomName+"/user";
+            const url="/";
             if(!user)
             {
                 fetch(url,{
                     method: "POST",
+                    headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({user: user, isuser:false})
                 })
                 .then(response => response.json())

@@ -32,14 +32,27 @@ const rooms = {};
 app.use(morgan('dev'));
 
 app.get("/",(req,res,next)=>{
-    res.render("index",{rooms:rooms});
+    res.render("userForm");
 });
+
+app.post("/",(req,res,next)=>
+{
+    // console.log(req.body);
+    if(!req.body.isuser)
+    res.json({redirect:"/"});
+    else
+    res.json({redirect:"/room"});
+});
+
+app.get("/room",(req,res,next)=>{
+    res.render("index",{rooms:rooms});
+})
 
 app.post("/room",(req,res,next)=>{
     const newRoomName = req.body.room;
     if(rooms[newRoomName]){
         // a room with same name already exists. Redirect user to the home page
-        res.redirect("/");
+        res.redirect("/room");
     }
     else{
         rooms[newRoomName] = { users: {} };
@@ -58,23 +71,17 @@ app.get("/:room/user",(req,res,next)=>{
     // console.log(req.params);
 
     // If room with the given name doesn't exist then redirect the user to the base page
-    if(!rooms[req.params.room]) {
-        res.redirect("/");
+    if(!rooms[req.params.room])
+    {
+        res.redirect("/room");
     }
-    else { 
-        res.render("userForm",{roomName : req.params.room});
+    else 
+    { 
+        res.render("problemPage");
     }
 });
 
-app.post("/:room/user",(req,res,next)=>{
-    //console.log(req.body);
-    if(req.body.isuser)
-    res.json({redirect:"/"});
-    else
-    res.json({redirect:"/"+req.params.room+"/user"});
-});
 
 io.on("connection",(socket)=> {
     console.log("A new connection joined");
-
 });
