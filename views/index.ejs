@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>CF Codearena</title>
+        
+    </head>
+    <body>
+        <script>
+            const user = "<%=user%>";
+        </script>
+        <div id = "room-container">
+            <% Object.keys(rooms).forEach( room =>{ %>
+                <div>
+                    <%= room %>
+                </div>
+                <a href="/<%= room %>/user/<%=user%>">Join</a>
+            <%})%>
+        </div>
+        <form action="/rooms/<%=user%>" method="POST">
+            <input type="text" name="room" id="" required>
+            <button type="submit"> Create New Room </button>
+        </form>
+       
+    <script src="http://localhost:5000/socket.io/socket.io.js"> </script>
+    <script src="../script.js"></script>
+    </body>
+    
+</html>

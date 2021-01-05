@@ -2,18 +2,23 @@
   "name": "cf-codearena",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
     "express": "^4.17.1",
+    "node-fetch": "^2.6.1",
     "socket.io": "^3.0.4"
   },
   "devDependencies": {
+    "morgan": "^1.10.0",
     "nodemon": "^2.0.6"
   }
 }
