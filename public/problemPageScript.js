@@ -73,7 +73,6 @@ socket.on("problem-link",({link})=> {
 });
 
 socket.on("display-logs",({handle,verdict})=>{
-    logsWindow.scrollTop = logsWindow.scrollHeight;
     var logWin= Array.from(logsWindow);
     const message= document.createElement("p");
     message.innerText="Verdict for Last Submission is "+ verdict;
@@ -85,4 +84,5 @@ socket.on("display-logs",({handle,verdict})=>{
     {
         logWin[1].append(message);
     }
+    for(let i=0;i<logsWindow.length;i++) logsWindow[i].scrollTop = logsWindow[i].scrollHeight;
 })
