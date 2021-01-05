@@ -80,7 +80,7 @@ app.get("/:room/user/:username",(req,res,next)=>{
     // If room with the given name doesn't exist then redirect the user to the base page
     if(!rooms[req.params.room])
     {
-        res.redirect("/room");
+        res.redirect("/rooms/"+req.params.username);
     }
     else 
     { 
@@ -179,8 +179,8 @@ io.on("connection",(socket)=> {
             
         }
     });
-    socket.on("user-logs",({handle,verdict,roomName}) => {
-        io.in(roomName).emit("display-logs",{handle:handle,verdict:verdict});
+    socket.on("user-logs",({handle,obj,roomName}) => {
+        io.in(roomName).emit("display-logs",{handle:handle,obj});
 
     })
 
