@@ -41,7 +41,7 @@ function onsubmit()
                     problem_index: latest_submission.problem.index,
                     contest_Id: latest_submission.problem.contestId,
                     verdict: latest_submission.verdict,
-
+                    time: latest_submission.creationTimeSeconds
                 };
                 if(obj.problem_index!==problem_index || obj.contest_Id!==contestId)
                 {
@@ -50,10 +50,17 @@ function onsubmit()
                 }
                 else
                 {
-                    socket.emit("user-logs",{handle:username,verdict:obj.verdict,roomName:roomName});
+                    socket.emit("user-logs",{handle:username,obj,roomName:roomName});
                 }
             }
         })
+}
+
+function toHHMMSS(sec_num)
+{
+    let date = new Date(0);//0=>set to epoch
+    date.setUTCSeconds(sec_num);
+    return date;
 }
 
 socket.on("problem-link",({link})=> {
@@ -72,11 +79,11 @@ socket.on("problem-link",({link})=> {
     submit.addEventListener("click",onsubmit.bind(link));
 });
 
-socket.on("display-logs",({handle,verdict})=>{
-    logsWindow.scrollTop = logsWindow.scrollHeight;
+socket.on("display-logs",({handle,obj})=>{
     var logWin= Array.from(logsWindow);
     const message= document.createElement("p");
-    message.innerText="Verdict for Last Submission is "+ verdict;
+    var time= toHHMMSS(obj.time);
+    message.innerHTML="Verdict for Last Submission is "+ "<b>" +obj.verdict + "</b>"+" on <i>" + time + "</i>";
     if(username===handle)
     {
         logWin[0].append(message);
@@ -85,4 +92,5 @@ socket.on("display-logs",({handle,verdict})=>{
     {
         logWin[1].append(message);
     }
+    for(let i=0;i<logWin.length;i++) logWin[i].scrollTop = logWin[i].scrollHeight;
 })
