@@ -30,11 +30,9 @@ app.use(bodyParser.json());
 const io = socketio(server,{});
 
 const rooms = {};
-const mp = new Map();
 const endpointUserStats = "https://codeforces.com/api/user.status?handle=";
 const endPointProblems = "https://codeforces.com/api/problemset.problems";
 const pre = "https://codeforces.com/contest/";
-let firstUserProblems = new Set(), secondUserProblems = new Set();
 
 // logger middleware for all requests
 // app.use(morgan('dev'));
@@ -125,8 +123,8 @@ async function fetchProblems(name,arr){
 
 async function giveProblemNotSolvedByBoth(handles)
 {
-    firstUserProblems = new Set();
-    secondUserProblems = new Set();
+    let firstUserProblems = new Set();
+    let secondUserProblems = new Set();
     await fetchProblems(handles[0], firstUserProblems);
     await fetchProblems(handles[1], secondUserProblems);
     console.log("here");
@@ -181,15 +179,11 @@ io.on("connection",(socket)=> {
             
         }
     });
+    socket.on("user-logs",({handle,verdict,roomName}) => {
+        io.in(roomName).emit("display-logs",{handle:handle,verdict:verdict});
 
+    })
 
-    console.log();
 });
 
-// (
-//     async function() {
-//         const temp = await giveProblemNotSolvedByBoth(["jkhandhara","harshmodi278"]);
-//         console.log({temp});
-//     }
-// )();
 
