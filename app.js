@@ -3,6 +3,7 @@ const express = require("express");
 const morgan = require("morgan");
 const app = express();
 const bodyParser= require("body-parser");
+
 // dotenv related
 const dotenv = require("dotenv");
 dotenv.config({path:"./.env",encoding:"utf-8"});
@@ -15,6 +16,9 @@ const PORT = process.env.PORT||5000;
 
 // fetch
 const fetch = require('node-fetch');
+
+// bcrypt related
+const bcryptjs = require("bcryptjs");
 
 const server = app.listen(PORT,
 ()=>console.log(`Server started listening on ${PORT}`)
@@ -64,6 +68,14 @@ app.post("/rooms/:username",(req,res,next)=>{
     }
     else{
         rooms[newRoomName] = { users: {} };
+        
+        bcryptjs.genSalt(10, (err, salt) => {
+            bcryptjs.hash(req.body.password, salt, (err1, hash) => {
+                if(err1) throw err1;
+                rooms[newRoomName].password = hash;
+            });
+        });
+
         // A user created a room, now we will show the link to join the room to all other users,too.
         // Currently what we do is we only render the "/:room" page to that user only so other users 
         // can't see that room w/o reloading.
@@ -71,12 +83,13 @@ app.post("/rooms/:username",(req,res,next)=>{
 
         io.emit("room-created",newRoomName);//sending to all clients, include sender.
 
-        res.redirect(`/${newRoomName}/user/${req.params.username}`);
+        // res.redirect(`/${newRoomName}/user/${req.params.username}`);
+        res.render("problemPage",{roomName: newRoomName, user: req.params.username});
     }
 });
 
-app.get("/:room/user/:username",(req,res,next)=>{
-    // console.log(req.params);
+app.post("/:room/user/:username",(req,res,next)=>{
+    console.log(req.params);
     // If room with the given name doesn't exist then redirect the user to the base page
     if(!rooms[req.params.room])
     {
@@ -84,7 +97,19 @@ app.get("/:room/user/:username",(req,res,next)=>{
     }
     else 
     { 
-        res.render("problemPage",{roomName: req.params.room, user: req.params.username});
+        console.log({body: req.body});
+        // check if password is valid or not
+        bcryptjs.compare(req.body.password, rooms[req.params.room].password)
+        .then((isMatch) => {
+            console.log({isMatch});
+            if (isMatch) {
+                res.render("problemPage",{roomName: req.params.room, user: req.params.username});
+            } else {
+                // wrong password -> redirect to rooms page
+                res.redirect("/rooms/:username");
+            }
+        });
+        
     }
 });
 
@@ -141,26 +166,62 @@ async function giveProblemNotSolvedByBoth(handles)
     })[0];
 }
 
+let refresh;
+function timer(minutes, roomName)
+{
+    const seconds = minutes*60;
+    const now = Date.now();
+    const finish = now + seconds*1000;
+
+    // display time once
+    io.in(roomName).emit("countdown",seconds);
+
+    // looping starts
+    refresh = setInterval(()=>{
+        const secondsLeft = Math.round((finish-Date.now())/1000);
+        console.log({secondsLeft});
+        if (secondsLeft<0) {
+            // maybe show their score or who is winner
+            // corner case: when 1-2 seconds were remaining and user submitted but it takes some time to fetch data from
+            // cf api so we might wait for about 1 minuite in the room and then both users will be out of room.
+            io.in(roomName).emit("time-up");
+            clearInterval(refresh);
+            return;
+        }
+        // display time
+        io.in(roomName).emit("countdown",secondsLeft);
+    },1000);
+}
+
 io.on("connection",(socket)=> {
+
+    console.log();
     console.log("A new connection joined");
     console.log(socket.id);
 
     
     socket.on("new-user",({handle,roomName})=> {
         console.log({handle:handle,roomName:roomName});
+
+        if(Array.from(Object.keys(rooms[roomName].users)).length == 2)
+        {
+            // Already two users are in the room
+            socket.emit("housefull",{redirect:`/rooms/${handle}`});
+            return;
+        }
         socket.join(roomName);
 
-        
+
         rooms[roomName].users[socket.id] = {handle, sock:socket};
         // console.log({rooms});
         // console.log(rooms[roomName].users);
-        const temp = Array.from(Object.keys(rooms[roomName].users));
+        const activeUsersRoom = Array.from(Object.keys(rooms[roomName].users));
 
         // Both users have joined the room
-        if(temp.length === 2)
+        if(activeUsersRoom.length === 2)
         {
             let handles = []
-            temp.forEach((sockId)=> {
+            activeUsersRoom.forEach((sockId)=> {
                 const currSock = rooms[roomName].users[sockId].sock;
                 const currHandle = rooms[roomName].users[sockId].handle;
                 handles.push(currHandle);
@@ -173,6 +234,9 @@ io.on("connection",(socket)=> {
                     const probLink = pre + prob.contestId + "/" + "problem/"+prob.index;
                     console.log({probLink});
                     io.in(roomName).emit("problem-link",{link:probLink});
+
+                    // minuites
+                    timer(1,roomName);
                 }
             )();
 
@@ -182,8 +246,26 @@ io.on("connection",(socket)=> {
     socket.on("user-logs",({handle,obj,roomName}) => {
         io.in(roomName).emit("display-logs",{handle:handle,obj});
 
-    })
+    });
 
+    // // i.e. client with socket instance 'socket' was disconnected
+    // socket.on("disconnect", (reason)=> {
+        
+    //     // get all the rooms where user with socket.id is joined: activeRooms
+    //     const activeRooms = Object.entries(rooms).filter((currRoom)=> {
+    //         const usersArray = Array.from(Object.keys(rooms[currRoom[0]].users));
+    //         console.log("here1", rooms[currRoom[0]].users[socket.id]);
+    //         if(usersArray.includes({handle : rooms[currRoom[0]].users[socket.id].handle, sock: socket})) {
+    //             return true;
+    //         }
+    //     });
+    //     console.log(activeRooms);
+    //     activeRooms.forEach((room)=> {
+    //         socket.to(room[0]).broadcast.emit("user-disconnect",rooms[room[0]].users[socket.id].handle);
+    //         delete rooms[room[0]].users[socket.id];
+    //     });
+    // });
+    
 });
 
 

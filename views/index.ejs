@@ -6,24 +6,32 @@
         
     </head>
     <body>
-        <script>
-            const user = "<%=user%>";
-        </script>
+        
         <div id = "room-container">
             <% Object.keys(rooms).forEach( room =>{ %>
                 <div>
                     <%= room %>
                 </div>
-                <a href="/<%= room %>/user/<%=user%>">Join</a>
+                <form action="/<%=room%>/user/<%=user%>" method="POST">
+                    <input type="password" name="password"  required>
+                    <button type="submit"> Submit </button>
+                </form>
+                
             <%})%>
         </div>
         <form action="/rooms/<%=user%>" method="POST">
-            <input type="text" name="room" id="" required>
+            <input type="text" name="room"  required>
+            <input type="password" name="password"  required>
             <button type="submit"> Create New Room </button>
         </form>
+
+        <script>
+            const user = "<%=user%>";
+        </script>
        
     <script src="http://localhost:5000/socket.io/socket.io.js"> </script>
     <script src="../script.js"></script>
+
     </body>
     
 </html>

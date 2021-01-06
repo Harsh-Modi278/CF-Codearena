@@ -11,6 +11,7 @@ socket.on("connect",
 const output = document.getElementById("output");
 const userTitles= Array.from(document.querySelectorAll(".user-logs-title"));
 const logsWindow = document.querySelectorAll(".user-logs-window");
+const timerDiv = document.getElementById("timer");
 
 socket.emit("new-user",{handle:username,roomName:roomName});
 
@@ -63,6 +64,14 @@ function toHHMMSS(sec_num)
     return date;
 }
 
+function toMMSS(sec) {
+    let m = String(Math.floor(sec/60));
+    if (m.length < 2) m = "0" + m;
+    let s = String(Math.floor(sec%60));
+    if (s.length < 2) s = "0" + s;
+    return `${m} : ${s}`;
+}
+
 socket.on("problem-link",({link})=> {
     console.log({link});
     const newLink = document.createElement("a");
@@ -93,4 +102,25 @@ socket.on("display-logs",({handle,obj})=>{
         logWin[1].append(message);
     }
     for(let i=0;i<logWin.length;i++) logWin[i].scrollTop = logWin[i].scrollHeight;
-})
+});
+
+// socket.on("user-disconnect",(handle)=> {
+//     // other user got disconnected
+//     logWin[1].append(message);
+//     for(let i=0;i<logWin.length;i++) logWin[i].scrollTop = logWin[i].scrollHeight;
+// });
+
+socket.on("housefull",({redirect})=> {
+    window.location.href = redirect;
+});
+
+socket.on("countdown",(secondsLeft)=> {
+    // console.log("here");
+    // console.log(toMMSS(secondsLeft));
+    // timerDiv
+    timerDiv.innerHTML = toMMSS(secondsLeft);
+});
+
+socket.on("time-up",()=>{
+    console.log("time is up");
+});
