@@ -3,6 +3,9 @@ const express = require("express");
 const morgan = require("morgan");
 const app = express();
 const bodyParser= require("body-parser");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const {authenticate} = require("./config/authenticate");
 
 // dotenv related
 const dotenv = require("dotenv");
@@ -24,9 +27,11 @@ const server = app.listen(PORT,
 ()=>console.log(`Server started listening on ${PORT}`)
 );
 
+app.use(morgan('dev'));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", "./views");
+app.use(cookieParser());
 app.use(express.urlencoded({extended:true}) );
 app.use(bodyParser.json());
 
@@ -52,19 +57,20 @@ app.post("/",(req,res,next)=>
         res.json({redirect:"/"});
     }
     else {
-        res.json({redirect:`/rooms/${req.body.user}`});
+        var token= jwt.sign({handle:req.body.user},process.env.JWT_key);
+        res.json({redirect:`/rooms`,token:token});
     }
 });
 
-app.get("/rooms/:username",(req,res,next)=>{
-    res.render("index",{rooms:rooms,user:req.params.username});
+app.get("/rooms",authenticate,(req,res,next)=>{
+    res.render("index",{rooms:rooms,user:req.user});
 })
 
-app.post("/rooms/:username",(req,res,next)=>{
+app.post("/rooms",authenticate,(req,res,next)=>{
     const newRoomName = req.body.room;
     if(rooms[newRoomName]){
         // a room with same name already exists. Redirect user to the home page
-        res.redirect(`/rooms/${req.params.username}`);
+        res.redirect(`/rooms`);
     }
     else{
         rooms[newRoomName] = { users: {} };
@@ -83,17 +89,16 @@ app.post("/rooms/:username",(req,res,next)=>{
 
         io.emit("room-created",newRoomName);//sending to all clients, include sender.
 
-        // res.redirect(`/${newRoomName}/user/${req.params.username}`);
-        res.render("problemPage",{roomName: newRoomName, user: req.params.username});
+        res.redirect(`/rooms`);
     }
 });
 
-app.post("/:room/user/:username",(req,res,next)=>{
+app.post("/rooms/:room",authenticate,(req,res,next)=>{
     console.log(req.params);
     // If room with the given name doesn't exist then redirect the user to the base page
     if(!rooms[req.params.room])
     {
-        res.redirect("/rooms/"+req.params.username);
+        res.redirect("/rooms");
     }
     else 
     { 
@@ -103,16 +108,17 @@ app.post("/:room/user/:username",(req,res,next)=>{
         .then((isMatch) => {
             console.log({isMatch});
             if (isMatch) {
-                res.render("problemPage",{roomName: req.params.room, user: req.params.username});
+                res.render("problemPage",{roomName: req.params.room, user: req.user});
             } else {
                 // wrong password -> redirect to rooms page
-                res.redirect("/rooms/:username");
+                res.redirect("/rooms");
             }
         });
         
     }
 });
 
+// Functions to fetch problem not solved by both user
 async function fetchProblems(name,arr){
     let response;
     try{

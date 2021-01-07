@@ -12,14 +12,14 @@
                 <div>
                     <%= room %>
                 </div>
-                <form action="/<%=room%>/user/<%=user%>" method="POST">
+                <form action="/rooms/<%=room%>" method="POST">
                     <input type="password" name="password"  required>
                     <button type="submit"> Submit </button>
                 </form>
                 
             <%})%>
         </div>
-        <form action="/rooms/<%=user%>" method="POST">
+        <form action="/rooms" method="POST">
             <input type="text" name="room"  required>
             <input type="password" name="password"  required>
             <button type="submit"> Create New Room </button>

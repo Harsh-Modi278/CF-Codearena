@@ -32,7 +32,8 @@ socket.on("room-created",(newRoomName)=>{
     input.required = true;
 
     const btn = document.createElement("button");
-    btn.innerHTML = "submit";
+    btn.innerText = "submit";
+    btn.type="submit";
 
     roomContainer.append(roomElement);
     newForm.appendChild(input);

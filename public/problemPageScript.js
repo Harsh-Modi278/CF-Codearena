@@ -85,7 +85,7 @@ socket.on("problem-link",({link})=> {
     newButton.innerHTML = "Submit";
     output.append(newButton);
     const submit= document.querySelector("button");
-    submit.addEventListener("click",onsubmit.bind(link));
+    submit.addEventListener("click",onsubmit);
 });
 
 socket.on("display-logs",({handle,obj})=>{
