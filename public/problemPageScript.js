@@ -115,12 +115,40 @@ socket.on("housefull",({redirect})=> {
 });
 
 socket.on("countdown",(secondsLeft)=> {
-    // console.log("here");
-    // console.log(toMMSS(secondsLeft));
     // timerDiv
     timerDiv.innerHTML = toMMSS(secondsLeft);
 });
 
-socket.on("time-up",()=>{
-    console.log("time is up");
+socket.on("time-up-countdown",()=>{
+    // console.log("time is up");
+
+    document.querySelector("#output a").style.display = "none";
+    document.querySelector("#output button").style.display = "none";
+
+    const newDiv = document.createElement("div");
+    newDiv.innerHTML = "<p>None of you have won</p>";
+
+    const newButton = document.createElement("button");
+    newButton.innerHTML = "Go to rooms page";
+    newButton.addEventListener("click", (e)=> {
+        socket.emit("delete-room",roomName);
+    });
+
+    output.append(newDiv);
+    output.append(newButton);
+
+    socket.emit("close-room",roomName);
+
+});
+
+socket.on("close-room",(secondsLeft)=> {
+    timerDiv.innerHTML = `<p> You will be redirected to rooms page in ${toMMSS(secondsLeft)} </p> `;
+});
+
+socket.on("time-up-close-room",()=> {
+    socket.emit("delete-room",roomName);
+});
+
+socket.on("room-deleted",()=>{
+    window.location.href = "/rooms";
 });

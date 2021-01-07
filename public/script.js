@@ -23,7 +23,7 @@ socket.on("room-created",(newRoomName)=>{
     roomElement.innerText = newRoomName;
 
     const newForm = document.createElement("form");
-    newForm.action = `/${newRoomName}/user/${user}`;
+    newForm.action = `/rooms/${newRoomName}`;
     newForm.method = "POST";
 
     const input = document.createElement("input");

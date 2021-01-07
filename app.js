@@ -93,6 +93,10 @@ app.post("/rooms",authenticate,(req,res,next)=>{
     }
 });
 
+app.get("/rooms/:room",(req, res, next)=> {
+    res.redirect("/rooms");
+});
+
 app.post("/rooms/:room",authenticate,(req,res,next)=>{
     console.log(req.params);
     // If room with the given name doesn't exist then redirect the user to the base page
@@ -172,31 +176,33 @@ async function giveProblemNotSolvedByBoth(handles)
     })[0];
 }
 
-let refresh;
-function timer(minutes, roomName)
+let refresh = [];
+function timer(minutes, roomName, eventName)
 {
+
+    console.log({minutes, eventName});
+
     const seconds = minutes*60;
     const now = Date.now();
     const finish = now + seconds*1000;
 
     // display time once
-    io.in(roomName).emit("countdown",seconds);
+    io.in(roomName).emit(eventName,seconds);
 
     // looping starts
-    refresh = setInterval(()=>{
+    const fun = setInterval(()=>{
         const secondsLeft = Math.round((finish-Date.now())/1000);
         console.log({secondsLeft});
         if (secondsLeft<0) {
-            // maybe show their score or who is winner
-            // corner case: when 1-2 seconds were remaining and user submitted but it takes some time to fetch data from
-            // cf api so we might wait for about 1 minuite in the room and then both users will be out of room.
-            io.in(roomName).emit("time-up");
-            clearInterval(refresh);
+            
+            io.in(roomName).emit(`time-up-${eventName}`);
+            refresh.forEach((func) => clearInterval(func));
             return;
         }
         // display time
-        io.in(roomName).emit("countdown",secondsLeft);
+        io.in(roomName).emit(eventName,secondsLeft);
     },1000);
+    refresh.push(fun);
 }
 
 io.on("connection",(socket)=> {
@@ -241,8 +247,8 @@ io.on("connection",(socket)=> {
                     console.log({probLink});
                     io.in(roomName).emit("problem-link",{link:probLink});
 
-                    // minuites
-                    timer(1,roomName);
+                    // minuites, roomName, eventName
+                    timer(1, roomName, "countdown");
                 }
             )();
 
@@ -252,6 +258,15 @@ io.on("connection",(socket)=> {
     socket.on("user-logs",({handle,obj,roomName}) => {
         io.in(roomName).emit("display-logs",{handle:handle,obj});
 
+    });
+
+    socket.once("close-room",(roomName)=> {
+        timer(15/60, roomName, "close-room");
+    });
+
+    socket.on("delete-room",(roomName)=>{
+        delete rooms[roomName];
+        socket.emit("room-deleted");
     });
 
     // // i.e. client with socket instance 'socket' was disconnected
