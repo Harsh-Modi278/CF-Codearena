@@ -43,8 +43,6 @@ const endpointUserStats = "https://codeforces.com/api/user.status?handle=";
 const endPointProblems = "https://codeforces.com/api/problemset.problems";
 const pre = "https://codeforces.com/contest/";
 
-// logger middleware for all requests
-// app.use(morgan('dev'));
 
 app.get("/",(req,res,next)=>{
     res.render("userForm");
@@ -93,7 +91,7 @@ app.post("/rooms",authenticate,(req,res,next)=>{
     }
 });
 
-app.get("/rooms/:room",(req, res, next)=> {
+app.get("/rooms/:room",authenticate,(req, res, next)=> {
     res.redirect("/rooms");
 });
 
@@ -170,13 +168,12 @@ async function giveProblemNotSolvedByBoth(handles)
     // console.log(jsonResponse.result.problems);
     return Array.from(jsonResponse.result.problems).filter((currProblem)=>{
         const link = pre + currProblem.contestId + "/" + currProblem.index;
-        if(!firstUserProblems.has(link) && !secondUserProblems.has(link)) {
+        if(!firstUserProblems.has(link) && !secondUserProblems.has(link) && currProblem.index==="A") {
             return true;
         }
     })[0];
 }
 
-let refresh = [];
 function timer(minutes, roomName, eventName)
 {
 
@@ -190,19 +187,17 @@ function timer(minutes, roomName, eventName)
     io.in(roomName).emit(eventName,seconds);
 
     // looping starts
-    const fun = setInterval(()=>{
+    rooms[roomName].timer = setInterval(()=>{
         const secondsLeft = Math.round((finish-Date.now())/1000);
         console.log({secondsLeft});
         if (secondsLeft<0) {
-            
             io.in(roomName).emit(`time-up-${eventName}`);
-            refresh.forEach((func) => clearInterval(func));
+            clearInterval(rooms[roomName].timer);
             return;
         }
         // display time
         io.in(roomName).emit(eventName,secondsLeft);
     },1000);
-    refresh.push(fun);
 }
 
 io.on("connection",(socket)=> {
@@ -257,11 +252,6 @@ io.on("connection",(socket)=> {
     });
     socket.on("user-logs",({handle,obj,roomName}) => {
         io.in(roomName).emit("display-logs",{handle:handle,obj});
-
-    });
-
-    socket.once("close-room",(roomName)=> {
-        timer(15/60, roomName, "close-room");
     });
 
     socket.on("delete-room",(roomName)=>{
@@ -269,6 +259,9 @@ io.on("connection",(socket)=> {
         socket.emit("room-deleted");
     });
 
+    socket.on("stop-timer",({roomName})=>{
+        clearInterval(rooms[roomName].timer);
+    })
     // // i.e. client with socket instance 'socket' was disconnected
     // socket.on("disconnect", (reason)=> {
         

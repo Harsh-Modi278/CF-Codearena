@@ -72,6 +72,24 @@ function toMMSS(sec) {
     return `${m} : ${s}`;
 }
 
+function closeRoom(message) 
+{
+    document.querySelector("#output a").style.display = "none";
+    document.querySelector("#output button").style.display = "none";
+
+    const newDiv = document.createElement("div");
+    newDiv.innerHTML = "<p>"+message+"</p>";
+
+    const newButton = document.createElement("button");
+    newButton.innerHTML = "Go to rooms page";
+    newButton.addEventListener("click", (e)=> {
+        socket.emit("delete-room",roomName);
+    });
+
+    output.append(newDiv);
+    output.append(newButton);
+}
+
 socket.on("problem-link",({link})=> {
     console.log({link});
     const newLink = document.createElement("a");
@@ -102,13 +120,19 @@ socket.on("display-logs",({handle,obj})=>{
         logWin[1].append(message);
     }
     for(let i=0;i<logWin.length;i++) logWin[i].scrollTop = logWin[i].scrollHeight;
+    if(obj.verdict==="OK")
+    {
+        if(username===handle)
+        {
+            closeRoom("You have won");
+        }
+        else
+        {
+            closeRoom(`${handle} have won`);
+        }
+        socket.emit("stop-timer",{roomName:roomName});
+    }
 });
-
-// socket.on("user-disconnect",(handle)=> {
-//     // other user got disconnected
-//     logWin[1].append(message);
-//     for(let i=0;i<logWin.length;i++) logWin[i].scrollTop = logWin[i].scrollHeight;
-// });
 
 socket.on("housefull",({redirect})=> {
     window.location.href = redirect;
@@ -121,34 +145,15 @@ socket.on("countdown",(secondsLeft)=> {
 
 socket.on("time-up-countdown",()=>{
     // console.log("time is up");
-
-    document.querySelector("#output a").style.display = "none";
-    document.querySelector("#output button").style.display = "none";
-
-    const newDiv = document.createElement("div");
-    newDiv.innerHTML = "<p>None of you have won</p>";
-
-    const newButton = document.createElement("button");
-    newButton.innerHTML = "Go to rooms page";
-    newButton.addEventListener("click", (e)=> {
-        socket.emit("delete-room",roomName);
-    });
-
-    output.append(newDiv);
-    output.append(newButton);
-
-    socket.emit("close-room",roomName);
-
-});
-
-socket.on("close-room",(secondsLeft)=> {
-    timerDiv.innerHTML = `<p> You will be redirected to rooms page in ${toMMSS(secondsLeft)} </p> `;
-});
-
-socket.on("time-up-close-room",()=> {
-    socket.emit("delete-room",roomName);
+    closeRoom("None of you have won!");
 });
 
 socket.on("room-deleted",()=>{
     window.location.href = "/rooms";
 });
+
+// socket.on("user-disconnect",(handle)=> {
+//     // other user got disconnected
+//     logWin[1].append(message);
+//     for(let i=0;i<logWin.length;i++) logWin[i].scrollTop = logWin[i].scrollHeight;
+// });
