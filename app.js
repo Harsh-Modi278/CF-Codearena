@@ -263,22 +263,42 @@ io.on("connection",(socket)=> {
         clearInterval(rooms[roomName].timer);
     })
     // // i.e. client with socket instance 'socket' was disconnected
-    // socket.on("disconnect", (reason)=> {
+    socket.on("disconnect", (reason)=> {
         
-    //     // get all the rooms where user with socket.id is joined: activeRooms
-    //     const activeRooms = Object.entries(rooms).filter((currRoom)=> {
-    //         const usersArray = Array.from(Object.keys(rooms[currRoom[0]].users));
-    //         console.log("here1", rooms[currRoom[0]].users[socket.id]);
-    //         if(usersArray.includes({handle : rooms[currRoom[0]].users[socket.id].handle, sock: socket})) {
-    //             return true;
-    //         }
-    //     });
-    //     console.log(activeRooms);
-    //     activeRooms.forEach((room)=> {
-    //         socket.to(room[0]).broadcast.emit("user-disconnect",rooms[room[0]].users[socket.id].handle);
-    //         delete rooms[room[0]].users[socket.id];
-    //     });
-    // });
+        // console.log({reason});
+        // console.log("rooms: ", rooms);
+
+        const activeRoom = Object.entries(rooms).filter((currRoom)=>{
+            // console.log(currRoom[1].hasOwnProperty("users"));
+            // console.log({currRoom});
+            if( !(currRoom && currRoom && currRoom[1].hasOwnProperty("users")) ) return false;
+            const currUsers = Object.entries(currRoom[1].users);
+            // console.log("currUsers: ",currUsers);
+            let socketExists = false;
+            for (let [sockId, userObj] of currUsers){
+                if (userObj.sock == socket){
+                    socketExists = true;
+                    break;
+                }
+            }
+            return socketExists;
+        })[0]; //.filter will return an array of 1 element, we will take it.
+        // console.log({activeRoom});
+        if(!activeRoom) return;
+        const activeRoomName = activeRoom[0];
+        const activeRoomUsers = activeRoom[1].users;
+        console.log({activeRoomUsers});
+        console.log({activeRoomName});
+        // There were only two users in room, user with 'socket' got disconnected, sending other user its handle
+        io.in(activeRoomName).emit(`user-disconnected`,activeRoomUsers[socket.id].handle);
+
+        // stopping the timer
+        clearInterval(rooms[activeRoomName].timer);
+
+        // deleting the room
+        delete rooms[activeRoomName];
+        
+    });
     
 });
 

@@ -152,8 +152,8 @@ socket.on("room-deleted",()=>{
     window.location.href = "/rooms";
 });
 
-// socket.on("user-disconnect",(handle)=> {
-//     // other user got disconnected
-//     logWin[1].append(message);
-//     for(let i=0;i<logWin.length;i++) logWin[i].scrollTop = logWin[i].scrollHeight;
-// });
+socket.on("user-disconnected",(handle)=> {
+    // other user got disconnected
+    console.log({handle} );
+    closeRoom(`${handle} left tha codearena`);
+});
