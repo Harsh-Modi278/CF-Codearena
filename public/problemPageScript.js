@@ -17,11 +17,12 @@ socket.emit("new-user",{handle:username,roomName:roomName});
 
 socket.on("compete-message",(handles)=> {
 
+    console.log(username, handles);
     // username - own handle
     userTitles[0].innerText = username;
     userTitles[1].innerText = (handles[0] === username ? handles[1] : handles[0]);
     const newDiv = document.createElement("div");
-    newDiv.innerHTML = `<h1> You are competing against ${handle}</h1>`;
+    newDiv.innerHTML = `<h1> You are competing against ${userTitles[1].innerText}</h1>`;
     output.append(newDiv);
 });
 
@@ -157,5 +158,5 @@ socket.on("room-deleted",()=>{
 socket.on("user-disconnected",(handle)=> {
     // other user got disconnected
     console.log({handle} );
-    closeRoom(`${handle} left tha codearena`);
+    closeRoom(`${handle} left the codearena`);
 });

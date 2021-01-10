@@ -52,6 +52,8 @@ app.use(bodyParser.json());
 const endpointUserStats = "https://codeforces.com/api/user.status?handle=";
 const endPointProblems = "https://codeforces.com/api/problemset.problems";
 const pre = "https://codeforces.com/contest/";
+const preHandle = "https://codeforces.com/api/user.info?handles=";
+const roomTimer = {};
 
 
 app.get("/",(req,res,next)=>{
@@ -93,6 +95,7 @@ app.post("/rooms",authenticate,(req,res,next)=>{
             }
             else
             {
+                roomTimer[newRoomName] = {};
                 const newRoom= new Room();
                 newRoom.roomName=newRoomName;
                 bcryptjs.genSalt(10, (err, salt) => {
@@ -151,7 +154,24 @@ app.post("/rooms/:room",authenticate,(req,res,next)=>{
  
 });
 
-// Functions to fetch problem not solved by both user
+function getRandomInt(max) 
+{
+  return Math.floor(Math.random() * Math.floor(max));
+}
+
+async function giveRatingOfUser(handle) {
+    let response;
+    try{
+        response = await fetch(preHandle+handle);
+    } catch(err) {
+        console.error(`Error in fetching rating of ${handle}`,err);
+    }
+    let jsonResponse = await response.json();
+    const rating = jsonResponse.result[0].rating;
+    console.log({rating});
+    return rating;
+}
+
 async function fetchProblems(name,arr){
     let response;
     try{
@@ -185,6 +205,7 @@ async function fetchProblems(name,arr){
    
 }
 
+// Functions to fetch problem not solved by both user
 async function giveProblemNotSolvedByBoth(handles)
 {
     let firstUserProblems = new Set();
@@ -197,12 +218,21 @@ async function giveProblemNotSolvedByBoth(handles)
     let jsonResponse = await response.json();
     console.log("here2");
     // console.log(jsonResponse.result.problems);
-    return Array.from(jsonResponse.result.problems).filter((currProblem)=>{
+
+    const rating1 = Number(await giveRatingOfUser(handles[0]));
+    const rating2 = Number(await giveRatingOfUser(handles[1]));
+
+    const problemsNotSolved = Array.from(jsonResponse.result.problems).filter((currProblem)=>{
         const link = pre + currProblem.contestId + "/" + currProblem.index;
-        if(!firstUserProblems.has(link) && !secondUserProblems.has(link) && currProblem.index==="A") {
+        if(!firstUserProblems.has(link) && !secondUserProblems.has(link) && currProblem.rating <= 100 + Math.max(rating1, rating2)
+        && currProblem.rating >= Math.min(rating1, rating2) - 100) {
             return true;
         }
-    })[0];
+    });
+    // console.log(problemsNotSolved);
+    const indx = getRandomInt(problemsNotSolved.length);
+    // console.log(indx);
+    return problemsNotSolved[indx];
 }
 
 function timer(minutes, roomName, eventName)
@@ -239,6 +269,7 @@ function timer(minutes, roomName, eventName)
                 // display time
                 io.in(roomName).emit(eventName,secondsLeft);
             },1000);
+            roomTimer[roomName].timer = fun;
             // console.log({fun});
             
         })
@@ -299,7 +330,7 @@ function ioConnection(socket)
                                 io.in(roomName).emit("problem-link",{link:probLink});
 
                                 // minuites, roomName, eventName
-                                timer(1, roomName, "countdown");
+                                timer(5, roomName, "countdown");
                             }
                         )();
                     }
@@ -326,6 +357,7 @@ function ioConnection(socket)
             }
             User.remove({roomName: roomName})
             .then((result)=> {
+                delete roomTimer[roomName];
                 console.log(`Deleted users in ${roomName}`);
                 socket.emit("room-deleted");
             })
@@ -335,13 +367,36 @@ function ioConnection(socket)
     });
 
     socket.on("stop-timer",({roomName})=>{
-        Room.findOne({roomName: roomName})
-            .then(room => {
-                clearInterval(room.timer);
-            })
-            .catch((err) => console.log(err));
+        clearInterval(roomTimer[roomName].timer);
+    });
 
-    })
+    socket.on("disconnect", (reason)=> {
+
+        // find the roomName in which current user with 'socket' was joined
+        User.findOne({socketId: socket.id})
+        .then((result)=> {
+            if(!result) return;
+            const roomName = result.roomName;
+            const handleLeft = result.handle;
+            // There were only two users in room, user with 'socket' got disconnected, sending other user its handle
+            io.in(roomName).emit("user-disconnected", handleLeft);
+
+            // delete this user entry from db
+            User.remove({socketId: socket.id})
+            .then(()=> {
+                // stopping the timer
+                clearInterval(roomTimer[roomName].timer);
+
+                // deleting the room
+                delete roomTimer[roomName];
+            })
+            .catch((err)=>console.error(err));
+
+            
+        })
+        .catch((err)=>console.error(err));
+        
+    });
     
 }
 
