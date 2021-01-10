@@ -37,6 +37,7 @@ const fetch = require('node-fetch');
 
 // bcrypt related
 const bcryptjs = require("bcryptjs");
+const User = require("./models/Users");
 
 
 app.use(morgan('dev'));
@@ -206,7 +207,7 @@ async function giveProblemNotSolvedByBoth(handles)
 
 function timer(minutes, roomName, eventName)
 {
-
+    
     console.log({minutes, eventName});
 
     const seconds = minutes*60;
@@ -219,26 +220,27 @@ function timer(minutes, roomName, eventName)
     // looping starts
     Room.findOne({roomName: roomName})
         .then(room =>{
-            room.timer = setInterval(()=>{
+
+            const fun = setInterval(function(){
                 const secondsLeft = Math.round((finish-Date.now())/1000);
                 console.log({secondsLeft});
                 if (secondsLeft<0) {
+                    // console.log("this: ", this);
                     io.in(roomName).emit(`time-up-${eventName}`);
                     Room.findOne({roomName: roomName})
                         .then(room => {
-                            clearInterval(room.timer);
+                            // console.log("this1: ", this);
+                            clearInterval(this);
                         })
-                        .catch((err) => console.log(err));
+                        .catch((err) => console.error("hereee:",err));
 
                     return;
                 }
                 // display time
                 io.in(roomName).emit(eventName,secondsLeft);
             },1000);
-            room.markModified('timer');
-            room.save()
-                .then(()=> console.log("Timer saved"))
-                .catch((err) => console.log(err))
+            // console.log({fun});
+            
         })
         .catch((err) => console.log(err));
 
@@ -253,56 +255,63 @@ function ioConnection(socket)
 
     socket.on("new-user",({handle,roomName})=> {
         console.log({handle:handle,roomName:roomName});
-        Room.findOne({roomName: roomName})
-            .then(room => {
-                if( Array.from(Object.keys(room.users)).length == 2)
-                {
-                    // Already two users are in the room
-                    socket.emit("housefull",{redirect:`/rooms`});
-                    return;
-                }
 
-                socket.join(roomName);
-                const x=socket.id;
-                const update={
-                    users: {x: {
-                        handle,
-                        sock: socket
-                    }}
-                }
-                Room.findByIdAndUpdate(room._id,update,{new:true})
-                    .then(room1=>{
-                        console.log("room modified");
-                        const activeUsersRoom = Array.from(Object.keys(room1.users));
-                        // Both users have joined the room
-                        if(activeUsersRoom.length === 2)
-                        {
-                            let handles = []
-                            activeUsersRoom.forEach((sockId)=> {
-                                const currSock = room1.users[sockId].sock;
-                                const currHandle = room1.users[sockId].handle;
-                                handles.push(currHandle);
-                                currSock.to(roomName).broadcast.emit("compete-message",currHandle);
-                            });
-                            
-                            // fetchProblem
-                            (async function() {
-                                    const prob = await giveProblemNotSolvedByBoth(handles);
-                                    const probLink = pre + prob.contestId + "/" + "problem/"+prob.index;
-                                    console.log({probLink});
-                                    io.in(roomName).emit("problem-link",{link:probLink});
+        // find how many users are currently in this room
+        User.find({roomName: roomName})
+        .then((result)=>{
+            
+            console.log({result});
 
-                                    // minuites, roomName, eventName
-                                    timer(1, roomName, "countdown");
-                                }
-                            )();   
-                        }
-                    })
-                    .catch((err) => console.log(err));
+            // Already two users are in the room
+            if(result.length == 2) {
+                console.log("Already two users are in the room");
+                socket.emit("housefull",{redirect:`/rooms`});
+                return;
+            }
+            socket.join(roomName);
+            // rooms[roomName].users[socket.id] = {handle, sock:socket};//associating current user with the room
+            // since there is space in the room, add the current user to the room.
+            const newUserInstance = new User({
+                socketId: socket.id,
+                handle: handle,
+                roomName: roomName,
+            });
+
+            newUserInstance.save()
+            .then(()=>{
+                // After saving the current user, now find how many users are currently in the room(active users)
+                User.find({roomName: roomName})
+                .then((result)=> {
+                    // Both users have joined the room
+                    if (result.length == 2) {
+                        console.log("Both users have joined the room");
+                        console.log({result});
+                        const handles = result.map((it)=> {
+                            return it.handle;
+                        });
+                        io.in(roomName).emit("compete-message",handles);
+
+                        // fetchProblem
+                        (async function() {
+                                const prob = await giveProblemNotSolvedByBoth(handles);
+                                const probLink = pre + prob.contestId + "/" + "problem/"+prob.index;
+                                console.log({probLink});
+                                io.in(roomName).emit("problem-link",{link:probLink});
+
+                                // minuites, roomName, eventName
+                                timer(1, roomName, "countdown");
+                            }
+                        )();
+                    }
+                })
+                .catch((err)=>console.error("here3: ",err));
 
             })
-            .catch((err) => console.log(err));
+            .catch((err)=>console.error("here2: ",err));
 
+            
+        })
+        .catch((err)=>console.error("here1:",err));
     });
     socket.on("user-logs",({handle,obj,roomName}) => {
         io.in(roomName).emit("display-logs",{handle:handle,obj});
@@ -315,7 +324,13 @@ function ioConnection(socket)
                 console.log(err);
                 return;
             }
-            socket.emit("room-deleted");
+            User.remove({roomName: roomName})
+            .then((result)=> {
+                console.log(`Deleted users in ${roomName}`);
+                socket.emit("room-deleted");
+            })
+            .catch((err)=>console.error(`Error in deleting users in ${roomName}`,err));
+            
         })
     });
 
@@ -329,5 +344,3 @@ function ioConnection(socket)
     })
     
 }
-
-

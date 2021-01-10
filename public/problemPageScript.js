@@ -15,9 +15,11 @@ const timerDiv = document.getElementById("timer");
 
 socket.emit("new-user",{handle:username,roomName:roomName});
 
-socket.on("compete-message",(handle)=> {
+socket.on("compete-message",(handles)=> {
+
+    // username - own handle
     userTitles[0].innerText = username;
-    userTitles[1].innerText = handle;
+    userTitles[1].innerText = (handles[0] === username ? handles[1] : handles[0]);
     const newDiv = document.createElement("div");
     newDiv.innerHTML = `<h1> You are competing against ${handle}</h1>`;
     output.append(newDiv);
@@ -152,8 +154,8 @@ socket.on("room-deleted",()=>{
     window.location.href = "/rooms";
 });
 
-// socket.on("user-disconnect",(handle)=> {
-//     // other user got disconnected
-//     logWin[1].append(message);
-//     for(let i=0;i<logWin.length;i++) logWin[i].scrollTop = logWin[i].scrollHeight;
-// });
+socket.on("user-disconnected",(handle)=> {
+    // other user got disconnected
+    console.log({handle} );
+    closeRoom(`${handle} left tha codearena`);
+});

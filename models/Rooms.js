@@ -1,4 +1,6 @@
 const mongoose= require('mongoose');
+mongoose.set('useFindAndModify', false);
+
 const roomSchema = new mongoose.Schema({
     roomName:{
         type: String,
@@ -7,16 +9,8 @@ const roomSchema = new mongoose.Schema({
     password:{
         type: String,
         required: true
-    },
-    users:{
-        type: mongoose.Schema.Types.Mixed,
-        default: {}
-    },
-    timer:{
-        type: mongoose.Schema.Types.Mixed,
-        default: {}
     }
-},{minimize:false})
+},{timestamps: true})
 
 const Room= mongoose.model('Room',roomSchema);
 module.exports = Room;
