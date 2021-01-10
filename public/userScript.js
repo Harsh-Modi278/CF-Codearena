@@ -47,7 +47,9 @@ function user_input(event)
                     body: JSON.stringify({user: user, isuser:true})
                 })
                 .then(response => response.json())
-                .then(data => window.location.href = data.redirect)
+                .then(data => {
+                    document.cookie = `token=${data.token}`;
+                    window.location.href = data.redirect})
                 .catch(err => console.log(err));
             }
                 
