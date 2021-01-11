@@ -3,9 +3,12 @@
     <head>
         <meta charset="utf-8">
         <title>CF Codearena</title>
-        
-    </head>
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
     <body>
+        <%- include('./partials/messages.ejs') %> 
         <div class="container">
             <div class="split left">
                 <div id = "room-container" >
@@ -25,7 +28,7 @@
                                 </div>
                                 <div class="col">
                                     <label for="inputPassword2" class="visually-hidden">Password</label>
-                                    <input type="password" name="password" class="form-control" placeholder="Password">
+                                    <input type="password" class="form-control" placeholder="Password" name="password">
                                 </div>
                                 <div class="col">
                                     <button type="submit" class="btn btn-dark mb-3">Join Room</button>
@@ -80,26 +83,21 @@
         font-family: 'Nunito';
         background-color: #dfdfdf;
         }
-
         .buttons {
         display: flex;
         justify-content: center;
         align-items: center;
         /* border: red 1px solid; */
         }
-
         .container{
             display: flex;
             justify-content: center;
             align-items: center;
         }
-
         
-
         .room-form{
             float: right;
         }
-
         .split {
         height: 100%;
         width: 50%;
@@ -109,19 +107,16 @@
         overflow-x: hidden;
         padding-top: 20px;
         }
-
         .left {
         left: 0;
         background-color: #dfdfdf;
         border-right: 1px black solid;
         }
-
         .right {
         right: 0;
         background-color: #dfdfdf;
         border-left: 1px black solid;
         }
-
         .centered {
         position: absolute;
         top: 50%;
@@ -129,10 +124,8 @@
         transform: translate(-50%, -50%);
         text-align: center;
         }
-
         
     </style>
-
     </body>
     
 </html>

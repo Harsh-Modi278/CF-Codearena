@@ -57,7 +57,8 @@ function onsubmit()
                 if(obj.problem_index!==problem_index || obj.contest_Id!==contestId)
                 {
                     // show error message that solution is not submitted
-                    alert(`You have not submitted solution on codeforces`);
+                    const ele= document.getElementById("alert");
+                    ele.innerHTML="<div class=\"alert alert-warning alert-dismissible\">You have not submitted solution on Codeforces<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button></div>"
                 }
                 else
                 {

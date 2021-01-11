@@ -19,6 +19,7 @@ const authenticate= (req, res, next) =>{
         });
     }
     else{
+        req.flash('error_msg','Enter CF handle');
         res.redirect('/');
     }
 }
