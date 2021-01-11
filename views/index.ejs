@@ -3,10 +3,12 @@
     <head>
         <meta charset="utf-8">
         <title>CF Codearena</title>
-        
-    </head>
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+</head>
     <body>
-        
+        <%- include('./partials/messages.ejs') %> 
         <div id = "room-container">
             <% if(rooms.length!=0){ %> 
                 <h3> Current Open Rooms </h3>
@@ -38,9 +40,6 @@
        
     <script src="http://localhost:5000/socket.io/socket.io.js"> </script>
     <script src="../script.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
-  
     <style>
         body {
         font-family: 'Nunito';

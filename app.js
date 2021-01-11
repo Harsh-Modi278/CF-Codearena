@@ -2,6 +2,8 @@
 const express = require("express");
 const mongoose = require('mongoose');
 const morgan = require("morgan");
+const flash= require('connect-flash');
+const session= require('express-session');
 const app = express();
 const bodyParser= require("body-parser");
 const cookieParser = require("cookie-parser");
@@ -43,6 +45,23 @@ app.set("views", "./views");
 app.use(cookieParser());
 app.use(express.urlencoded({extended:true}) );
 app.use(bodyParser.json());
+
+// Express session
+app.use(session({
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true,
+  }));
+// Connect Flash
+app.use(flash());
+
+// Global Vars
+app.use((req,res,next)=>{
+    res.locals.success_msg = req.flash('success_msg');
+    res.locals.error_msg = req.flash('error_msg');
+    res.locals.error = req.flash('error');
+    next();
+});
 
 
 const pre = "https://codeforces.com/contest/";

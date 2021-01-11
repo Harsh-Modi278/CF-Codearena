@@ -13,7 +13,6 @@ async function get_user(user)
     const response = await fetch(base_url+user);
     if(!response.ok)
     {
-        alert("PLEASE ENTER PROPER USER HANDLE");
         return;
     }
     let data = await response.json();

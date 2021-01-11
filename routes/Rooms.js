@@ -25,6 +25,7 @@ router.post("/",authenticate,(req, res)=>{
         .then(room=>{
             if(room)
             {
+                req.flash("error_msg","Room with given name already exists");
                 res.redirect('/rooms');
             }
             else
@@ -41,6 +42,7 @@ router.post("/",authenticate,(req, res)=>{
                                 console.log("Room saved");
                                 // const io=req.app.get('socketio');
                                 io.emit("room-created",newRoomName);//sending to all clients, include sender.
+                                req.flash('success_msg', 'Room created successfully');
                                 res.redirect(`/rooms`);
                                 })
                             .catch(err => console.log(err,"Error in room saving"))
@@ -53,6 +55,7 @@ router.post("/",authenticate,(req, res)=>{
 
 // Get on /rooms/:room
 router.get('/:room',authenticate,(req, res) => {
+    req.flash("error_msg","Please enter room password");
     res.redirect("/rooms");
 })
 
@@ -70,11 +73,13 @@ router.post('/:room',authenticate,(req, res)=>{
                         console.log({isMatch});
                         if (isMatch) 
                         {
+                            req.flash('success_msg','Entered Room Successfully');
                             res.render("problemPage",{roomName: roomName, user: req.user});   
                         } 
                         else 
                         {
                             // wrong password -> redirect to rooms page
+                            req.flash('error_msg','Please enter correct room password');
                             res.redirect("/rooms");
                         }
                     })
@@ -82,6 +87,7 @@ router.post('/:room',authenticate,(req, res)=>{
             }
             else
             {
+                req.flash('error_msg','Room with given name not exist ');
                 // If room with the given name doesn't exist then redirect the user to the base page
                 res.redirect("/rooms");
             }
