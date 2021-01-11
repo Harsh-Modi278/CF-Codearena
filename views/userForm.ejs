@@ -9,27 +9,31 @@
 </head>
 <body>
     <%- include('./partials/messages.ejs') %> 
-    <h1 class="heading">
-        Welcome to CF-Codearena
-    </h1><br><br>
-    <form method="post" action="/">
-        <div class="input-group">
-            <label for="user" style="font-size:20px">ENTER YOUR<br> CODEFORCES HANDLE: </label>
-            <input type="text" id="user" class="form-control" placeholder="Enter CF-Handle"name="user" required><br>
-        </div>
-        <div class="buttons">
-            <button type="submit" class="problem" class="btn btn-dark">SUBMIT</button>
-        </div>
-    </form>
+    <div class="container">
+        <h1 class="heading">
+            Welcome to CF-Codearena
+        </h1><br><br>
+        <form method="post" action="/">
+            <div class="mb-3">
+                <label for="user" style="font-size:20px" class="form-label">Enter your Codeforces Handle </label>
+                <input type="text" id="user" class="form-control" placeholder="Enter CF-Handle"name="user" required><br>
+            </div>
+            <div class="buttons">
+                <button type="submit" class="problem btn btn-dark">SUBMIT</button>
+            </div>
+        </form>
+    </div>
+    
     <script src="http://localhost:5000/socket.io/socket.io.js"> </script>
     <script src="../userScript.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
   
     <style>
         body {
         font-family: 'Nunito';
         background-color: #dfdfdf;
         }
-
         .buttons {
         display: flex;
         justify-content: center;
