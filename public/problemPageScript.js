@@ -173,3 +173,8 @@ socket.on("user-disconnected",(handle)=> {
     console.log({handle} );
     closeRoom(`${handle} left the codearena`);
 });
+
+socket.on("feedback",()=>{
+    const ele=document.getElementById("feedback");
+    ele.innerHTML="<h3><b> Wait till another user comes </b></h3>";
+});

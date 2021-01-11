@@ -170,6 +170,10 @@ function ioConnection(socket)
                         
                         
                     }
+                    else
+                    {
+                        socket.emit("feedback");
+                    }
                 })
                 .catch((err)=>console.error("here3: ",err));
 
