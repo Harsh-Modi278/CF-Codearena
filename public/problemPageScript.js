@@ -20,6 +20,7 @@ socket.emit("new-user",{handle:username,roomName:roomName});
 
 socket.on("compete-message",(handles, userClasses)=> {
 
+    feedback.innerHTML = "";
     console.log(username, handles);
     // username - own handle
     const otherIndx = (handles[0] === username ? 1 : 0); 

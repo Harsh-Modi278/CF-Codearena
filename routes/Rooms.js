@@ -73,7 +73,6 @@ router.post('/:room',authenticate,(req, res)=>{
                         console.log({isMatch});
                         if (isMatch) 
                         {
-                            req.flash('success_msg','Entered Room Successfully');
                             res.render("problemPage",{roomName: roomName, user: req.user});   
                         } 
                         else 
