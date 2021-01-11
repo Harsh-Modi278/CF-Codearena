@@ -5,7 +5,6 @@ const Room= require("../models/Rooms");
 // bcrypt related
 const bcryptjs = require("bcryptjs");
 
-
 // Get on rooms
 router.get("/",authenticate,(req, res) => {
     Room.find({},(err,rooms)=>{
@@ -71,7 +70,7 @@ router.post('/:room',authenticate,(req, res)=>{
                         console.log({isMatch});
                         if (isMatch) 
                         {
-                            res.render("problemPage",{roomName: roomName, user: req.user});
+                            res.render("problemPage",{roomName: roomName, user: req.user});   
                         } 
                         else 
                         {

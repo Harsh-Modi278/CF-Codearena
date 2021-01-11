@@ -14,6 +14,9 @@ const User = require("./models/Users");
 const Room= require("./models/Rooms");
 const {giveProblemNotSolvedByBoth,timer}= require('./config/functions');
 
+// node-fetch related
+const fetch = require("node-fetch");
+
 // DB config
 const db= process.env.MONGOURI;
 let server;
@@ -49,6 +52,27 @@ app.use("/",require('./routes/Home'));
 
 app.use("/rooms",require('./routes/Rooms'));
 
+async function getUserColorClass(handle) {
+    const endpoint = `https://codeforces.com/api/user.info?handles=${handle}`;
+    let response;
+    try{
+        response = await fetch(endpoint);
+    } catch (err) {
+        console.error(err);
+    }
+    const jsonResponse = await response.json();
+    const rating = jsonResponse.result[0].rating;
+    console.log({handle, rating});
+    if(rating <= 1199) return "user-gray";
+    if(rating >= 1200 && rating < 1400) return "user-green";
+    if(rating >= 1400 && rating < 1600) return "user-cyan";
+    if(rating >= 1600 && rating < 1900) return "user-blue";
+    if(rating >= 1900 && rating < 2200) return "user-violet";
+    if(rating >= 2200 && rating < 2300) return "user-orange";
+    if(rating >= 2300 && rating < 2400) return "user-orange";
+    if(rating >= 2900) return "user-legendry";
+    return "user-red";
+}
 
 function ioConnection(socket)
 {
@@ -93,19 +117,39 @@ function ioConnection(socket)
                         const handles = result.map((it)=> {
                             return it.handle;
                         });
-                        io.in(roomName).emit("compete-message",handles);
+                        console.log({handles});
+                        console.log(handles.length - 1);
+                        let userClasses = {} , i = 0;
+                        handles.forEach((currHandle)=> {
+                            console.log("i: ",i, currHandle);
+                            const prom = getUserColorClass(currHandle);
+                            prom.then((userClass)=> {
+                                console.log({userClass});
+                                console.log(typeof i, typeof (handles.length-1));
+                                userClasses[currHandle] = userClass;
+                                console.log(i == handles.length - 1);
+                                if(i +1 == handles.length) {
+                                    console.log({userClasses});
+                                    io.in(roomName).emit("compete-message",handles,userClasses);
+                                    // fetchProblem
+                                    (async function() {
+                                        const prob = await giveProblemNotSolvedByBoth(handles);
+                                        const probLink = pre + prob.contestId + "/" + "problem/"+prob.index;
+                                        console.log({probLink});
+                                        io.in(roomName).emit("problem-link",{link:probLink});
 
-                        // fetchProblem
-                        (async function() {
-                                const prob = await giveProblemNotSolvedByBoth(handles);
-                                const probLink = pre + prob.contestId + "/" + "problem/"+prob.index;
-                                console.log({probLink});
-                                io.in(roomName).emit("problem-link",{link:probLink});
-
-                                // minuites, roomName, eventName
-                                timer(5, roomName, "countdown");
-                            }
-                        )();
+                                        // minuites, roomName, eventName
+                                        timer(5, roomName, "countdown");
+                                    }
+                                    )();
+                                }
+                                i++;
+                            })
+                            .catch((err)=>console.error(err));
+                            
+                        })
+                        
+                        
                     }
                 })
                 .catch((err)=>console.error("here3: ",err));

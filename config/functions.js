@@ -104,7 +104,7 @@ function timer(minutes, roomName, eventName)
     // looping starts
     Room.findOne({roomName: roomName})
         .then(room =>{
-
+            roomTimer[roomName] = {};
             const fun = setInterval(function(){
                 const secondsLeft = Math.round((finish-Date.now())/1000);
                 //console.log({secondsLeft});

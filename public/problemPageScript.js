@@ -9,21 +9,28 @@ socket.on("connect",
 );
 
 const output = document.getElementById("output");
+const probLinkDiv = document.getElementById("prob-link");
 const userTitles= Array.from(document.querySelectorAll(".user-logs-title"));
 const logsWindow = document.querySelectorAll(".user-logs-window");
 const timerDiv = document.getElementById("timer");
+const buttonsDiv = document.querySelector(".buttons");
+const feedback = document.getElementById("feedback");
 
 socket.emit("new-user",{handle:username,roomName:roomName});
 
-socket.on("compete-message",(handles)=> {
+socket.on("compete-message",(handles, userClasses)=> {
 
     console.log(username, handles);
     // username - own handle
-    userTitles[0].innerText = username;
-    userTitles[1].innerText = (handles[0] === username ? handles[1] : handles[0]);
-    const newDiv = document.createElement("div");
-    newDiv.innerHTML = `<h1> You are competing against ${userTitles[1].innerText}</h1>`;
-    output.append(newDiv);
+    const otherIndx = (handles[0] === username ? 1 : 0); 
+    userTitles[0].innerHTML = " <strong class =" + userClasses[handles[1-otherIndx]] + ">" + username + "</strong>";
+    userTitles[1].innerHTML = " <strong class =" + userClasses[handles[otherIndx]] + ">" + handles[otherIndx] + "</strong>";
+    const newH1 = document.createElement("h1");
+    newH1.innerHTML = `You are competing against`;
+    const str = " <strong class =" + userClasses[handles[otherIndx]] + ">" + userTitles[1].innerText + "</strong>";
+    newH1.innerHTML += str;
+    output.append(newH1);
+    
 });
 
 function onsubmit()
@@ -77,20 +84,22 @@ function toMMSS(sec) {
 
 function closeRoom(message) 
 {
-    document.querySelector("#output a").style.display = "none";
-    document.querySelector("#output button").style.display = "none";
+    document.querySelector("#prob-link").style.display = "none";
+    document.querySelector(".submitbutton").style.display = "none";
 
     const newDiv = document.createElement("div");
-    newDiv.innerHTML = "<p>"+message+"</p>";
+    newDiv.innerHTML = "<h1>"+message+"</h1>";
 
     const newButton = document.createElement("button");
     newButton.innerHTML = "Go to rooms page";
+    newButton.classList.add("btn");
+    newButton.classList.add("btn-dark");
     newButton.addEventListener("click", (e)=> {
         socket.emit("delete-room",roomName);
     });
 
-    output.append(newDiv);
-    output.append(newButton);
+    feedback.append(newDiv);
+    buttonsDiv.append(newButton);
 }
 
 socket.on("problem-link",({link})=> {
@@ -100,11 +109,14 @@ socket.on("problem-link",({link})=> {
     newLink.title = `${link}`;
     newLink.href = link;
     newLink.target = "_blank";
-    output.append(newLink);
+    probLinkDiv.append(newLink);
 
     const newButton = document.createElement("button");
     newButton.innerHTML = "Submit";
-    output.append(newButton);
+    newButton.classList.add("submitbutton");
+    newButton.classList.add("btn");
+    newButton.classList.add("btn-dark");
+    buttonsDiv.append(newButton);
     const submit= document.querySelector("button");
     submit.addEventListener("click",onsubmit);
 });
@@ -143,7 +155,7 @@ socket.on("housefull",({redirect})=> {
 
 socket.on("countdown",(secondsLeft)=> {
     // timerDiv
-    timerDiv.innerHTML = toMMSS(secondsLeft);
+    timerDiv.innerHTML = `<h1>${toMMSS(secondsLeft)}<h1>`;
 });
 
 socket.on("time-up-countdown",()=>{
