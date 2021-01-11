@@ -25,7 +25,7 @@
                                 </div>
                                 <div class="col">
                                     <label for="inputPassword2" class="visually-hidden">Password</label>
-                                    <input type="password" class="form-control" placeholder="Password">
+                                    <input type="password" name="password" class="form-control" placeholder="Password">
                                 </div>
                                 <div class="col">
                                     <button type="submit" class="btn btn-dark mb-3">Join Room</button>
@@ -40,6 +40,9 @@
             
             <div class="room-form split right">
                 
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <h2>Hello, <%= user%></h2>
+                </div>
                 <form action="/rooms" method="POST" class="centered">
                     <div style="display: flex; justify-content: center; align-items: center;">
                         <h3> Create a New Room to Compete </h3>
