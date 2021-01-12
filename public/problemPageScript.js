@@ -3,7 +3,7 @@ const socket = io("http://localhost:5000");
 socket.on("connect",
 ()=>{
     // console.log({socketId:socket.id});
-    console.log({username,sockId: socket.id});
+    // console.log({username,sockId: socket.id});
     // socket.emit("self-user",{username:username, roomName});
 }
 );
@@ -22,7 +22,7 @@ socket.emit("new-user",{handle:username,roomName:roomName});
 socket.on("compete-message",(handles, userClasses)=> {
 
     feedback.innerHTML = "";
-    console.log(username, handles);
+    // console.log(username, handles);
     // username - own handle
     const otherIndx = (handles[0] === username ? 1 : 0); 
     userTitles[0].innerHTML = " <strong class =" + userClasses[handles[1-otherIndx]] + ">" + username + "</strong>";
@@ -76,7 +76,7 @@ function onsubmit()
                     newbtn.setAttribute("aria-label", "close");
 
                     newDiv.append(newbtn);
-                    console.log({newDiv});
+                    // console.log({newDiv});
 
                     if (document.getElementById("alert-1")) {
                         ele.replaceChild(newDiv,document.getElementById("alert-1"));
@@ -133,7 +133,7 @@ function closeRoom(message)
 
 socket.on("problem-link",({link})=> {
     if(userDisconnectedFlag) return;
-    console.log({link});
+    // console.log({link});
     const newLink = document.createElement("a");
     newLink.appendChild(document.createTextNode(`${link}`));
     newLink.title = `${link}`;
@@ -190,7 +190,7 @@ socket.on("countdown",(secondsLeft)=> {
 
 socket.on("time-up-countdown",()=>{
     if(userDisconnectedFlag) return;
-    console.log("time is up");
+    // console.log("time is up");
     closeRoom("None of you have won!");
 });
 
@@ -201,7 +201,7 @@ socket.on("room-deleted",()=>{
 socket.on("user-disconnected",(handle)=> {
     // other user got disconnected
     userDisconnectedFlag = true;
-    console.log({handle} );
+    // console.log({handle} );
     closeRoom(`${handle} left the codearena`);
 });
 

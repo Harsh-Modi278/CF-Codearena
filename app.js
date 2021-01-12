@@ -81,7 +81,7 @@ async function getUserColorClass(handle) {
     }
     const jsonResponse = await response.json();
     const rating = jsonResponse.result[0].rating;
-    console.log({handle, rating});
+    // console.log({handle, rating});
     if(rating <= 1199) return "user-gray";
     if(rating >= 1200 && rating < 1400) return "user-green";
     if(rating >= 1400 && rating < 1600) return "user-cyan";
@@ -107,11 +107,11 @@ function ioConnection(socket)
         User.find({roomName: roomName})
         .then((result)=>{
             
-            console.log({result});
+            // console.log({result});
 
             // Already two users are in the room
             if(result.length == 2) {
-                console.log("Already two users are in the room");
+                // console.log("Already two users are in the room");
                 socket.emit("housefull",{redirect:`/rooms`});
                 return;
             }
@@ -131,30 +131,27 @@ function ioConnection(socket)
                 .then((result)=> {
                     // Both users have joined the room
                     if (result.length == 2) {
-                        console.log("Both users have joined the room");
-                        console.log({result});
+                        // console.log("Both users have joined the room");
+                        // console.log({result});
                         const handles = result.map((it)=> {
                             return it.handle;
                         });
-                        console.log({handles});
-                        console.log(handles.length - 1);
+                        // console.log({handles});
                         let userClasses = {} , i = 0;
                         handles.forEach((currHandle)=> {
-                            console.log("i: ",i, currHandle);
+                            // console.log("i: ",i, currHandle);
                             const prom = getUserColorClass(currHandle);
                             prom.then((userClass)=> {
-                                console.log({userClass});
-                                console.log(typeof i, typeof (handles.length-1));
+                                // console.log({userClass});
                                 userClasses[currHandle] = userClass;
-                                console.log(i == handles.length - 1);
                                 if(i +1 == handles.length) {
-                                    console.log({userClasses});
+                                    // console.log({userClasses});
                                     io.in(roomName).emit("compete-message",handles,userClasses);
                                     // fetchProblem
                                     (async function() {
                                         const prob = await giveProblemNotSolvedByBoth(handles);
                                         const probLink = pre + prob.contestId + "/" + "problem/"+prob.index;
-                                        console.log({probLink});
+                                        // console.log({probLink});
                                         io.in(roomName).emit("problem-link",{link:probLink});
 
                                         // minuites, roomName, eventName
@@ -198,7 +195,7 @@ function ioConnection(socket)
             User.remove({roomName: roomName})
             .then((result)=> {
                 delete roomTimer[roomName];
-                console.log(`Deleted users in ${roomName}`);
+                // console.log(`Deleted users in ${roomName}`);
                 socket.emit("room-deleted");
             })
             .catch((err)=>console.error(`Error in deleting users in ${roomName}`,err));
