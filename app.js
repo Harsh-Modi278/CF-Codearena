@@ -155,7 +155,7 @@ function ioConnection(socket)
                                         io.in(roomName).emit("problem-link",{link:probLink});
 
                                         // minuites, roomName, eventName
-                                        timer(1, roomName, "countdown");
+                                        timer(60, roomName, "countdown");
                                     }
                                     )();
                                 }
