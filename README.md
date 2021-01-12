@@ -22,15 +22,12 @@ Bootstrapped with [Bootstrap](https://getbootstrap.com/)
 * Don't refresh the page after the problem link is given.
 
 # Developement
-*You need to install Node to start the developement environment. Download Node here: [Node](https://nodejs.org/en/)
-
-*You need to setup a .env file in the root of the repository. The template for the same is as following:
-
+* You need to install Node to start the developement environment. Download Node here: [Node](https://nodejs.org/en/)
+* You need to setup a .env file in the root of the repository. The template for the same is as following:
 ```
 JWT_key = #your secret key for jwt authentication
 MONGOURI = #mongoDB atlas link of your database
 ```
-
 * Run
 
 ```
