@@ -8,6 +8,7 @@ socket.on("connect",
 }
 );
 
+let userDisconnectedFlag = false;
 const output = document.getElementById("output");
 const probLinkDiv = document.getElementById("prob-link");
 const userTitles= Array.from(document.querySelectorAll(".user-logs-title"));
@@ -55,14 +56,36 @@ function onsubmit()
                     verdict: latest_submission.verdict,
                     time: latest_submission.creationTimeSeconds
                 };
-                if(obj.problem_index!==problem_index || obj.contest_Id!==contestId)
-                {
+                if(obj.problem_index!==problem_index || obj.contest_Id!==contestId) {
                     // show error message that solution is not submitted
-                    const ele= document.getElementById("alert");
-                    ele.innerHTML="<div class=\"alert alert-warning alert-dismissible\">You have not submitted solution on Codeforces<button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button></div>"
+                    const ele= document.getElementById("alert-div");
+                    const newDiv = document.createElement("div");
+                    ["alert", "alert-warning", "alert-dismissible", "fade", "show"].forEach((className)=>{
+                        newDiv.classList.add(className);
+                    });
+                    newDiv.setAttribute("role", "alert");
+                    newDiv.setAttribute("id", "alert-1");
+                    newDiv.innerText = "You have not submitted solution on Codeforces"
+                    newDiv.style = "display: flex; justify-content: center; align-items: center;"
+                    const newbtn = document.createElement("button");
+                    newbtn.type = "button";
+                    ["close", "btn-close"].forEach((className)=>{
+                        newbtn.classList.add(className);
+                    });
+                    newbtn.setAttribute("data-bs-dismiss", "alert");
+                    newbtn.setAttribute("aria-label", "close");
+
+                    newDiv.append(newbtn);
+                    console.log({newDiv});
+
+                    if (document.getElementById("alert-1")) {
+                        ele.replaceChild(newDiv,document.getElementById("alert-1"));
+                    }
+                    else {
+                        ele.append(newDiv);
+                    }
                 }
-                else
-                {
+                else {
                     socket.emit("user-logs",{handle:username,obj,roomName:roomName});
                 }
             }
@@ -86,8 +109,12 @@ function toMMSS(sec) {
 
 function closeRoom(message) 
 {
-    document.querySelector("#prob-link").style.display = "none";
-    document.querySelector(".submitbutton").style.display = "none";
+    if(document.querySelector("#prob-link")) {
+        document.querySelector("#prob-link").style.display = "none";
+    }
+    if(document.querySelector(".submitbutton")) {
+        document.querySelector(".submitbutton").style.display = "none";
+    }
 
     const newDiv = document.createElement("div");
     newDiv.innerHTML = "<h1>"+message+"</h1>";
@@ -105,6 +132,7 @@ function closeRoom(message)
 }
 
 socket.on("problem-link",({link})=> {
+    if(userDisconnectedFlag) return;
     console.log({link});
     const newLink = document.createElement("a");
     newLink.appendChild(document.createTextNode(`${link}`));
@@ -156,12 +184,13 @@ socket.on("housefull",({redirect})=> {
 });
 
 socket.on("countdown",(secondsLeft)=> {
-    // timerDiv
+    if(userDisconnectedFlag) return;
     timerDiv.innerHTML = `<h1>${toMMSS(secondsLeft)}<h1>`;
 });
 
 socket.on("time-up-countdown",()=>{
-    // console.log("time is up");
+    if(userDisconnectedFlag) return;
+    console.log("time is up");
     closeRoom("None of you have won!");
 });
 
@@ -171,6 +200,7 @@ socket.on("room-deleted",()=>{
 
 socket.on("user-disconnected",(handle)=> {
     // other user got disconnected
+    userDisconnectedFlag = true;
     console.log({handle} );
     closeRoom(`${handle} left the codearena`);
 });
