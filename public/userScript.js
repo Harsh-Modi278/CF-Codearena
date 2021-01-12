@@ -1,7 +1,9 @@
-const socket = io("http://localhost:5000");
+const socket = io();
 
 socket.on("connect",
-()=>console.log({socketId:socket.id})
+()=>{
+    console.log({socketId:socket.id});
+}
 );
 
 const user_html= document.getElementById('user');
@@ -13,7 +15,6 @@ async function get_user(user)
     const response = await fetch(base_url+user);
     if(!response.ok)
     {
-        alert("PLEASE ENTER PROPER USER HANDLE");
         return;
     }
     let data = await response.json();
@@ -27,7 +28,7 @@ function user_input(event)
     get_user(user_html.value)
         .then((user)=>{
             const url="/";
-            console.log({user});
+            // console.log({user});
             if(!user)
             {
                 fetch(url,{

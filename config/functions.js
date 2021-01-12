@@ -22,7 +22,7 @@ async function giveRatingOfUser(handle) {
     }
     let jsonResponse = await response.json();
     const rating = jsonResponse.result[0].rating;
-    console.log({rating});
+    // console.log({rating});
     return rating;
 }
 
@@ -65,11 +65,11 @@ async function giveProblemNotSolvedByBoth(handles)
     let secondUserProblems = new Set();
     await fetchProblems(handles[0], firstUserProblems);
     await fetchProblems(handles[1], secondUserProblems);
-    console.log("here");
+    // console.log("here");
     let response = await fetch(endPointProblems);
-    console.log("here1");
+    // console.log("here1");
     let jsonResponse = await response.json();
-    console.log("here2");
+    // console.log("here2");
     // console.log(jsonResponse.result.problems);
 
     const rating1 = Number(await giveRatingOfUser(handles[0]));
@@ -92,7 +92,7 @@ async function giveProblemNotSolvedByBoth(handles)
 function timer(minutes, roomName, eventName)
 {
     
-    console.log({minutes, eventName});
+    // console.log({minutes, eventName});
 
     const seconds = minutes*60;
     const now = Date.now();
@@ -104,7 +104,7 @@ function timer(minutes, roomName, eventName)
     // looping starts
     Room.findOne({roomName: roomName})
         .then(room =>{
-
+            roomTimer[roomName] = {};
             const fun = setInterval(function(){
                 const secondsLeft = Math.round((finish-Date.now())/1000);
                 //console.log({secondsLeft});

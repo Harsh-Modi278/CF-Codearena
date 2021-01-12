@@ -1,29 +1,38 @@
-const socket = io("http://localhost:5000");
+const socket = io();
 
 socket.on("connect",
 ()=>{
     // console.log({socketId:socket.id});
-    console.log({username,sockId: socket.id});
+    // console.log({username,sockId: socket.id});
     // socket.emit("self-user",{username:username, roomName});
 }
 );
 
+let userDisconnectedFlag = false;
 const output = document.getElementById("output");
+const probLinkDiv = document.getElementById("prob-link");
 const userTitles= Array.from(document.querySelectorAll(".user-logs-title"));
 const logsWindow = document.querySelectorAll(".user-logs-window");
 const timerDiv = document.getElementById("timer");
+const buttonsDiv = document.querySelector(".buttons");
+const feedback = document.getElementById("feedback");
 
 socket.emit("new-user",{handle:username,roomName:roomName});
 
-socket.on("compete-message",(handles)=> {
+socket.on("compete-message",(handles, userClasses)=> {
 
-    console.log(username, handles);
+    feedback.innerHTML = "";
+    // console.log(username, handles);
     // username - own handle
-    userTitles[0].innerText = username;
-    userTitles[1].innerText = (handles[0] === username ? handles[1] : handles[0]);
-    const newDiv = document.createElement("div");
-    newDiv.innerHTML = `<h1> You are competing against ${userTitles[1].innerText}</h1>`;
-    output.append(newDiv);
+    const otherIndx = (handles[0] === username ? 1 : 0); 
+    userTitles[0].innerHTML = " <strong class =" + userClasses[handles[1-otherIndx]] + ">" + username + "</strong>";
+    userTitles[1].innerHTML = " <strong class =" + userClasses[handles[otherIndx]] + ">" + handles[otherIndx] + "</strong>";
+    const newH1 = document.createElement("h1");
+    newH1.innerHTML = `You are competing against`;
+    const str = " <strong class =" + userClasses[handles[otherIndx]] + ">" + userTitles[1].innerText + "</strong>";
+    newH1.innerHTML += str;
+    output.append(newH1);
+    
 });
 
 function onsubmit()
@@ -47,13 +56,36 @@ function onsubmit()
                     verdict: latest_submission.verdict,
                     time: latest_submission.creationTimeSeconds
                 };
-                if(obj.problem_index!==problem_index || obj.contest_Id!==contestId)
-                {
+                if(obj.problem_index!==problem_index || obj.contest_Id!==contestId) {
                     // show error message that solution is not submitted
-                    alert(`You have not submitted solution on codeforces`);
+                    const ele= document.getElementById("alert-div");
+                    const newDiv = document.createElement("div");
+                    ["alert", "alert-warning", "alert-dismissible", "fade", "show"].forEach((className)=>{
+                        newDiv.classList.add(className);
+                    });
+                    newDiv.setAttribute("role", "alert");
+                    newDiv.setAttribute("id", "alert-1");
+                    newDiv.innerText = "You have not submitted solution on Codeforces"
+                    newDiv.style = "display: flex; justify-content: center; align-items: center;"
+                    const newbtn = document.createElement("button");
+                    newbtn.type = "button";
+                    ["close", "btn-close"].forEach((className)=>{
+                        newbtn.classList.add(className);
+                    });
+                    newbtn.setAttribute("data-bs-dismiss", "alert");
+                    newbtn.setAttribute("aria-label", "close");
+
+                    newDiv.append(newbtn);
+                    // console.log({newDiv});
+
+                    if (document.getElementById("alert-1")) {
+                        ele.replaceChild(newDiv,document.getElementById("alert-1"));
+                    }
+                    else {
+                        ele.append(newDiv);
+                    }
                 }
-                else
-                {
+                else {
                     socket.emit("user-logs",{handle:username,obj,roomName:roomName});
                 }
             }
@@ -77,34 +109,44 @@ function toMMSS(sec) {
 
 function closeRoom(message) 
 {
-    document.querySelector("#output a").style.display = "none";
-    document.querySelector("#output button").style.display = "none";
+    if(document.querySelector("#prob-link")) {
+        document.querySelector("#prob-link").style.display = "none";
+    }
+    if(document.querySelector(".submitbutton")) {
+        document.querySelector(".submitbutton").style.display = "none";
+    }
 
     const newDiv = document.createElement("div");
-    newDiv.innerHTML = "<p>"+message+"</p>";
+    newDiv.innerHTML = "<h1>"+message+"</h1>";
 
     const newButton = document.createElement("button");
     newButton.innerHTML = "Go to rooms page";
+    newButton.classList.add("btn");
+    newButton.classList.add("btn-dark");
     newButton.addEventListener("click", (e)=> {
         socket.emit("delete-room",roomName);
     });
 
-    output.append(newDiv);
-    output.append(newButton);
+    feedback.append(newDiv);
+    buttonsDiv.append(newButton);
 }
 
 socket.on("problem-link",({link})=> {
-    console.log({link});
+    if(userDisconnectedFlag) return;
+    // console.log({link});
     const newLink = document.createElement("a");
     newLink.appendChild(document.createTextNode(`${link}`));
     newLink.title = `${link}`;
     newLink.href = link;
     newLink.target = "_blank";
-    output.append(newLink);
+    probLinkDiv.append(newLink);
 
     const newButton = document.createElement("button");
     newButton.innerHTML = "Submit";
-    output.append(newButton);
+    newButton.classList.add("submitbutton");
+    newButton.classList.add("btn");
+    newButton.classList.add("btn-dark");
+    buttonsDiv.append(newButton);
     const submit= document.querySelector("button");
     submit.addEventListener("click",onsubmit);
 });
@@ -142,11 +184,12 @@ socket.on("housefull",({redirect})=> {
 });
 
 socket.on("countdown",(secondsLeft)=> {
-    // timerDiv
-    timerDiv.innerHTML = toMMSS(secondsLeft);
+    if(userDisconnectedFlag) return;
+    timerDiv.innerHTML = `<h1>${toMMSS(secondsLeft)}<h1>`;
 });
 
 socket.on("time-up-countdown",()=>{
+    if(userDisconnectedFlag) return;
     // console.log("time is up");
     closeRoom("None of you have won!");
 });
@@ -157,6 +200,12 @@ socket.on("room-deleted",()=>{
 
 socket.on("user-disconnected",(handle)=> {
     // other user got disconnected
-    console.log({handle} );
+    userDisconnectedFlag = true;
+    // console.log({handle} );
     closeRoom(`${handle} left the codearena`);
+});
+
+socket.on("feedback",()=>{
+    const ele=document.getElementById("feedback");
+    ele.innerHTML="<h3><b> Wait till another user comes </b></h3>";
 });
