@@ -1,7 +1,9 @@
 const socket = io("http://localhost:5000");
 
 socket.on("connect",
-()=>console.log({socketId:socket.id})
+()=>{
+    console.log({socketId:socket.id});
+}
 );
 
 const user_html= document.getElementById('user');
@@ -26,7 +28,7 @@ function user_input(event)
     get_user(user_html.value)
         .then((user)=>{
             const url="/";
-            console.log({user});
+            // console.log({user});
             if(!user)
             {
                 fetch(url,{

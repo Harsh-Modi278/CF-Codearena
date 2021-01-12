@@ -7,12 +7,14 @@ const roomContainer = document.getElementById("room-container");
 
 
 socket.on("connect",
-()=>console.log({socketId:socket.id})
+()=>{
+    // console.log({socketId:socket.id});
+}
 );
 
 // Append room name and link to join the room to the room container.
 socket.on("room-created",(newRoomName)=>{
-    console.log(`${newRoomName} created`);
+    // console.log(`${newRoomName} created`);
 
     const newDiv = document.createElement("div");
     newDiv.classList.add("container");
