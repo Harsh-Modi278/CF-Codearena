@@ -39,7 +39,7 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true,useFindAn
 
 
 // Middleware 
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", "./views");
