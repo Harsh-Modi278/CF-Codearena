@@ -1,7 +1,7 @@
 // express related
 const express = require("express");
 const mongoose = require('mongoose');
-const morgan = require("morgan");
+// const morgan = require("morgan");
 const flash= require('connect-flash');
 const session= require('express-session');
 const app = express();
