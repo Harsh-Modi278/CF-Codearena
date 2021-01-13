@@ -23,6 +23,9 @@ const fetch = require("node-fetch");
 const db= process.env.MONGOURI;
 let server;
 
+// The port on which Node.js server is running
+const PORT = process.env.PORT||5000;
+
 // Connect to mongo
 mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true,useFindAndModify: false })
     .then(()=> {
@@ -32,10 +35,6 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true,useFindAn
             // app.set('socketio',io);
             console.log('Connected to DB')})
     .catch((err)=>console.log(err))
-
-// The port on which Node.js server is running
-const PORT = process.env.PORT||5000;
-
 
 // Middleware 
 app.use(morgan('dev'));
