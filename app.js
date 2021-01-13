@@ -35,9 +35,6 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true,useFindAn
             console.log('Connected to DB')})
     .catch((err)=>console.log(err))
 
-
-
-
 // Middleware 
 // app.use(morgan('dev'));
 app.use(express.static("public"));
@@ -49,7 +46,7 @@ app.use(bodyParser.json());
 
 // Express session
 app.use(session({
-    secret: 'secret',
+    secret: process.env.SESSION_SECRET,
     resave: true,
     saveUninitialized: true,
   }));

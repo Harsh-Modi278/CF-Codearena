@@ -10,7 +10,6 @@ router.get('/',(req, res) => {
 
 // Post Home page
 router.post('/',(req, res) => {
-    console.log(req.body);
     if(!req.body.isuser)
     {
         req.flash('error_msg','Please enter correct cf handle');
