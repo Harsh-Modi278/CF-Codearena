@@ -2,7 +2,7 @@ const socket = io();
 
 socket.on("connect",
 ()=>{
-    console.log({socketId:socket.id});
+    // console.log({socketId:socket.id});
 }
 );
 
@@ -28,7 +28,6 @@ function user_input(event)
     get_user(user_html.value)
         .then((user)=>{
             const url="/";
-            // console.log({user});
             if(!user)
             {
                 fetch(url,{

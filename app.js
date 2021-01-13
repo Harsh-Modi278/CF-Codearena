@@ -1,7 +1,7 @@
 // express related
 const express = require("express");
 const mongoose = require('mongoose');
-const morgan = require("morgan");
+// const morgan = require("morgan");
 const flash= require('connect-flash');
 const session= require('express-session');
 const app = express();
@@ -23,6 +23,8 @@ const fetch = require("node-fetch");
 const db= process.env.MONGOURI;
 let server;
 
+// The port on which Node.js server is running
+const PORT = process.env.PORT||5000;
 // Connect to mongo
 mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true,useFindAndModify: false })
     .then(()=> {
@@ -33,12 +35,8 @@ mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true,useFindAn
             console.log('Connected to DB')})
     .catch((err)=>console.log(err))
 
-// The port on which Node.js server is running
-const PORT = process.env.PORT||5000;
-
-
 // Middleware 
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", "./views");
@@ -48,7 +46,7 @@ app.use(bodyParser.json());
 
 // Express session
 app.use(session({
-    secret: 'secret',
+    secret: process.env.SESSION_SECRET,
     resave: true,
     saveUninitialized: true,
   }));
