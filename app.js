@@ -1,7 +1,7 @@
 // express related
 const express = require("express");
 const mongoose = require("mongoose");
-const morgan = require("morgan");
+// const morgan = require("morgan");
 const flash = require("connect-flash");
 const session = require("express-session");
 const app = express();
@@ -25,7 +25,6 @@ let server;
 
 // The port on which Node.js server is running
 const PORT = process.env.PORT || 5000;
-
 // Connect to mongo
 mongoose
   .connect(db, {
@@ -45,7 +44,7 @@ mongoose
   .catch((err) => console.log(err));
 
 // Middleware
-app.use(morgan("dev"));
+// app.use(morgan('dev'));
 app.use(express.static("public"));
 app.set("view engine", "ejs");
 app.set("views", "./views");
