@@ -1,26 +1,21 @@
-const jwt= require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 
-const authenticate= (req, res, next) =>{
-
-    const token=req.cookies.token;
-    //console.log(req.cookies);
-    if(token){
-        jwt.verify(token,process.env.JWT_key,(err,decode)=>{
-            if(err )
-            {
-                console.log(err);
-                res.redirect('/');
-            }
-            else
-            {
-                req.user=decode.handle;
-                next();
-            }
-        });
-    }
-    else{
-        req.flash('error_msg','Enter CF handle');
-        res.redirect('/');
-    }
-}
-module.exports = {authenticate};
+const authenticate = (req, res, next) => {
+  const token = req.cookies.token;
+  //console.log(req.cookies);
+  if (token) {
+    jwt.verify(token, process.env.JWT_key, (err, decode) => {
+      if (err) {
+        console.log(err);
+        res.redirect("/");
+      } else {
+        req.user = decode.handle;
+        next();
+      }
+    });
+  } else {
+    req.flash("error_msg", "Enter CF handle");
+    res.redirect("/");
+  }
+};
+module.exports = { authenticate };
